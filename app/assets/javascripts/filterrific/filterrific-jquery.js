@@ -54,24 +54,24 @@ Filterrific.submitFilterForm = function(){
       var $this = $(this);
       var prev = $this.val();
       var check = function() {
-        if(removed()){ // if removed clear the interval and don't fire the callback
-          if(ti) clearInterval(ti);
-          return;
-        }
-        var val = $this.val();
-        if(prev != val){
-          prev = val;
-          $this.map(callback); // invokes the callback on $this
-        }
+	if(removed()){ // if removed clear the interval and don't fire the callback
+	  if(ti) clearInterval(ti);
+	  return;
+	}
+	var val = $this.val();
+	if(prev != val){
+	  prev = val;
+	  $this.map(callback); // invokes the callback on $this
+	}
       };
       var removed = function() {
-        return $this.closest('html').length == 0
+	return $this.closest('html').length == 0
       };
       var reset = function() {
-        if(ti){
-          clearInterval(ti);
-          ti = setInterval(check, frequency);
-        }
+	if(ti){
+	  clearInterval(ti);
+	  ti = setInterval(check, frequency);
+	}
       };
       check();
       var ti = setInterval(check, frequency); // invoke check periodically
@@ -98,15 +98,22 @@ Filterrific.init = function() {
   );
 };
 
+Filterrific.destroy = function() {
+  // Remove change event handler to all Filterrific filter inputs.
+  $('#filterrific_filter').off(
+    "change",
+    ":input",
+    Filterrific.submitFilterForm
+  );
+
+  // Remove periodic observer to selected inputs.
+  $(".filterrific-periodically-observed").off();
+};
+
 
 // Initialize event observers on document ready and turbolinks page:load
 jQuery(document).on('turbolinks:load', function() {
-  // Prevent double initilisation. With turbolinks 5 this function
-  // will be called twice: on 'ready' and 'turbolinks:load'
-  jQuery(document).off('ready page:load')
-  Filterrific.init();
-});
-
-jQuery(document).on('ready page:load', function() {
-  Filterrific.init();
+    Filterrific.init();
+}).on('turbolinks:before-cache', function() {
+    Filterrific.destroy();
 });
